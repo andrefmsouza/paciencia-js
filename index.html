@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <heade>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="css/style.css" />
+        
+        <title>Paciência</title>
+    </heade>
+    <body>
+        <div id="jogo">
+            <div>
+                <div class="estoque">
+                    <div class="pilha_estoque" id="estoque" onclick="jogo.descartar_carta()"></div>
+                    <div class="pilha_descarte" id="descarte"></div>
+                </div>
+    
+                <div class="fundacoes">
+                    <div class="pilha_fundacao" id="fundacao1" draggable="false" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"></div>
+                    <div class="pilha_fundacao" id="fundacao2" draggable="false" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"></div>
+                    <div class="pilha_fundacao" id="fundacao3" draggable="false" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"></div>
+                    <div class="pilha_fundacao" id="fundacao4" draggable="false" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"></div>
+                </div>
+            </div>
+
+            <div>
+                <div class="pilhas">
+                    <div class="pilha" id="pilha1" draggable="false" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"></div>
+                    <div class="pilha" id="pilha2" draggable="false" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"></div>
+                    <div class="pilha" id="pilha3" draggable="false" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"></div>
+                    <div class="pilha" id="pilha4" draggable="false" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"></div>
+                    <div class="pilha" id="pilha5" draggable="false" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"></div>
+                    <div class="pilha" id="pilha6" draggable="false" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"></div>
+                    <div class="pilha" id="pilha7" draggable="false" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)"></div>
+                </div>
+            </div>
+        </div>
+
+        
+        <script src="js/baralho.js" ></script>
+        <script src="js/jogo.js" ></script>
+    </body>
+</html>

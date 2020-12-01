@@ -1,0 +1,124 @@
+html, body{
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: green;
+}
+
+#jogo{
+    width: 100vw;
+    height: 100vh;
+    min-width: 575px;
+    max-width: 650px;
+
+    background-color: green;
+    margin-left: 0px;
+    margin: auto;
+}
+
+#jogo .pilha_fundacao .carta{
+    margin-top: -1px !important;
+    transform: none !important;
+}
+
+#jogo .carta{
+    width: 60px;
+    height: 85px;
+    background-color: blue;
+
+    border: 1px solid;
+    border-radius: 5px;
+
+    margin-top: -1px;
+    margin-left: -1px;
+
+    transform: translateY(20px);
+    position: absolute;
+}
+
+#jogo > div{
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+#jogo > div:nth-child(1){
+    justify-content: space-between;
+}
+
+#jogo > div:nth-child(2){
+    justify-content: center;
+}
+
+#jogo .pilha_estoque{
+    width: 60px;
+    height: 85px;
+    border: 1px solid;
+    border-radius: 5px;
+    margin: 10px;
+    float: left;
+}
+
+#jogo .pilha_descarte{
+    width: 60px;
+    height: 85px;
+    border: 1px solid;
+    border-radius: 5px;
+    margin: 10px;
+    float: left;
+}
+
+#jogo .pilha_fundacao{
+    width: 60px;
+    height: 85px;
+    border: 1px solid black;
+    border-radius: 5px;
+    margin: 10px;
+    right: 0px;
+    color: white;
+
+    float: right;
+
+}
+
+#jogo .pilhas{
+    display: flex;
+}
+
+#jogo .pilha{
+    width: 60px;
+    height: 85px;
+    border: 1px solid black;
+    border-radius: 5px;
+    margin: 10px;
+    color: white;
+
+    top: 105px;
+    right: 0px;
+}
+
+#jogo .carta-virada{
+    background-color: white;
+    border: 1px solid black;
+}
+
+#jogo .carta-virada::before{
+    content: attr(data-naipe) ' ' attr(data-carta);
+    color: black;
+    position: absolute;
+}
+
+#jogo .pilha::before{
+    content: "K";
+    position: absolute;
+}
+
+#jogo .pilha_fundacao::before{
+    content: "A";
+    position: absolute;
+}
+
+#jogo .pilha_fundacao > .carta, #jogo .pilha_estoque > .carta, #jogo .pilha_descarte > .carta, #jogo .pilha > .carta{
+    margin-top: -20px;
+}
