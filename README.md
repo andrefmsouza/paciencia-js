@@ -79,7 +79,7 @@ As seguintes ferramentas foram usadas na construção do projeto:
 
 ## 🚀 Como executar o projeto
 
-Basta fazer o download do projeto e executar o arquivo index.js no seu navegador ou [clicar aqui](https://andrefmsouza.github.io/paciencia-js) para jogar online.
+Basta fazer o download do projeto e executar o arquivo index.js no seu navegador ou [clicar aqui](https://andrefmsouza.github.io/paciencia-js/) para jogar online.
 
 <br/>
 <hr/>
