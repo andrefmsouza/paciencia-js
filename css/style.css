@@ -1,20 +1,25 @@
-html, body{
+:root {
+    --primary-color: #1a472a;
+    --card-bg: #ffffff;
+    --card-border: #2c2c2c;
+    --card-shadow: rgba(0, 0, 0, 0.2);
+    --pile-border: rgba(255, 255, 255, 0.3);
+}
+
+html, body {
     margin: 0;
     padding: 0;
     height: 100vh;
     width: 100vw;
-    background-color: green;
+    background-color: var(--primary-color);
+    font-family: 'Arial', sans-serif;
 }
 
-#jogo{
-    width: 100vw;
-    height: 100vh;
-    min-width: 575px;
-    max-width: 650px;
-
-    background-color: green;
-    margin-left: 0px;
-    margin: auto;
+#jogo {
+    width: 100%;
+    height: calc(100vh - env(safe-area-inset-top));
+    padding: 10px;
+    box-sizing: border-box;
 }
 
 #jogo .pilha_fundacao .carta{
@@ -23,18 +28,21 @@ html, body{
 }
 
 #jogo .carta{
-    width: 60px;
-    height: 85px;
-    background-color: blue;
+    width: calc((100vw - 40px) / 7);  /* 40px = padding total (20px) + gap total entre cartas */
+    height: calc(((100vw - 40px) / 7) * 1.4);  /* proporção da carta 1:1.4 */
+    max-width: 70px;
+    max-height: 98px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--card-shadow);
+    transition: transform 0.2s ease;
+    position: relative;
+    cursor: pointer;
+}
 
-    border: 1px solid;
-    border-radius: 5px;
-
-    margin-top: -1px;
-    margin-left: -1px;
-
-    transform: translateY(20px);
-    position: absolute;
+#jogo .carta:hover {
+    transform: translateY(1px);
 }
 
 #jogo > div{
@@ -82,20 +90,21 @@ html, body{
 
 }
 
-#jogo .pilhas{
+#jogo .pilhas {
     display: flex;
+    justify-content: space-between;
+    gap: 5px;
+    width: 100%;
+    max-width: 615px;
 }
 
 #jogo .pilha{
-    width: 60px;
-    height: 85px;
-    border: 1px solid black;
-    border-radius: 5px;
-    margin: 10px;
-    color: white;
-
-    top: 105px;
-    right: 0px;
+    width: clamp(50px, 8vw, 70px);
+    height: clamp(70px, 12vw, 100px);
+    border: 2px dashed var(--pile-border);
+    border-radius: 8px;
+    margin: 5px;
+    position: relative;
 }
 
 #jogo .carta-virada{
@@ -120,5 +129,85 @@ html, body{
 }
 
 #jogo .pilha_fundacao > .carta, #jogo .pilha_estoque > .carta, #jogo .pilha_descarte > .carta, #jogo .pilha > .carta{
-    margin-top: -20px;
+    margin-top: 0;
+}
+
+/* Ajuste para sobreposição das cartas nas pilhas */
+#jogo .pilha .carta {
+    position: absolute;
+    margin-top: 25px !important;
+    margin-left: -1px !important;
+}
+
+#jogo .pilha > .carta:first-child {
+    margin-top: 0 !important;
+}
+
+#jogo .pilha .carta:not(:first-child) {
+    margin-top: calc(25px + var(--card-offset, 25px)) !important;
+}
+
+/* Ajuste para sobreposição nas pilhas de fundação e descarte */
+#jogo .pilha_fundacao .carta,
+#jogo .pilha_descarte .carta {
+    position: absolute;
+    margin-top: 0 !important;
+}
+
+#jogo .pilha_descarte .carta:not(:first-child) {
+    margin-top: 5px !important;
+}
+
+/* Ajuste específico para cartas na pilha de estoque */
+#jogo .pilha_estoque .carta {
+    position: absolute;
+    margin: 0 !important;
+}
+
+@media (max-width: 768px) {
+    #jogo {
+        padding: 10px;
+    }
+    
+    #jogo > div:nth-child(1) {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .fundacoes {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+/* Ajustes para iPhone */
+@supports (-webkit-touch-callout: none) {
+    #jogo {
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+    
+    #jogo .carta {
+        -webkit-transform: translate3d(0,0,0);
+        transform: translate3d(0,0,0);
+    }
+}
+
+@media screen and (max-width: 390px) {
+    #jogo {
+        padding: 5px;
+    }
+    
+    #jogo .pilhas {
+        gap: 2px;
+    }
+    
+    #jogo .carta {
+        width: calc((100vw - 20px) / 7);  /* 20px = padding total (10px) + gap total entre cartas */
+        height: calc(((100vw - 20px) / 7) * 1.4);
+        min-width: auto;
+        font-size: 0.8em;
+    }
 }

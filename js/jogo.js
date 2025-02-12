@@ -1,32 +1,32 @@
+let draggedElement = null;
+let offsetX = 0;
+let offsetY = 0;
+
 const jogo = {
     baralho: [],
     pilhas: [ -1, -1, -1, -1, -1, -1, -1 ],
     fundacao: [ -1, -1, -1, -1],
     estoque: [],
     descarte: [],
+    
     //Cria os elementos visuais do jogo
     criar_carta(index){
-        //Cria um novo elemento
         const carta = document.createElement("div");
-        //Adiciona o estila da carta
         carta.classList.add("carta");
-        //Cria o identificados da carta de acordo com a posicao no array do baralho
         carta.id = index;
-        //Adiciona os atributos de axibição da carta
         carta.setAttribute("data-cor", this.baralho[index].naipe.cor);
         carta.setAttribute("data-carta", this.baralho[index].nome);
-        
         carta.setAttribute("data-naipe", this.baralho[index].naipe.emoji);
-        //Desabilita a funcao de movimentacao da carta
-        carta.draggable = false;
-        //Permite que outras cartas sejam arrastadas até ela
-        carta.allowDrop=true;
-        //Adiciona as funcoes de validaçao
-        carta.ondragstart = drag;
-        carta.ondragover = allowDrop;
-        carta.ondrop = drop;
 
-        //Adiciona a carta inicialmente à pilha de estoque
+        // Mantém os eventos de mouse
+        carta.draggable = true;
+        carta.addEventListener('dragstart', drag, { passive: true });
+        carta.addEventListener('dragover', allowDrop);
+        carta.addEventListener('drop', drop, { passive: true });
+        carta.addEventListener('touchstart', touchstart, { passive: true });
+        carta.addEventListener('touchmove', touchmove, { passive: true });
+        carta.addEventListener('touchend', touchend, { passive: true });
+
         this.estoque.push(index);
         document.getElementById("estoque").appendChild(carta);
     },
@@ -36,7 +36,8 @@ const jogo = {
         let carta = document.getElementById(index);
         //Adiciona o CSS à carta
         carta.classList.add("carta-virada");
-        //Habilita a movimentação da carta
+        
+        // Mantém os eventos de mouse
         carta.draggable = true;
 
         //Se a carta estiver no estoque, move para a pilha de descarte.
@@ -62,7 +63,8 @@ const jogo = {
         }
     },
     //Funcao chamada ao clicar na pilha de estoque
-    descartar_carta(){
+    descartar_carta() {
+        
         //Verifica se possui cartas no estoque
         if(this.estoque.length > 0){
             //Move a ultima carta para a pilha de descarte
@@ -70,137 +72,177 @@ const jogo = {
             this.descarte.push(ultima_carta_estoque);
             ultima_carta_estoque = parseInt(ultima_carta_estoque);
     
-            this.virar_carta( ultima_carta_estoque, true );
+            this.virar_carta(ultima_carta_estoque, true);
         //Caso nao tenha mais cartas, pega novamente as cartas do descarte
-        }else if( this.descarte.length > 0 ){
+        } else if(this.descarte.length > 0){
             this.reset_pilha_estoque();
         }
+    },
+    //Verifica se o jogo acabou
+    verificarFimDeJogo() {
+        // Conta quantas cartas existem nas fundações
+        const cartasNasFundacoes = document.querySelector('.fundacoes').getElementsByClassName('carta').length;
+
+        if(cartasNasFundacoes === 52) {
+            alert('Parabéns! Você venceu o jogo!');
+        }
     }
+}
+
+function touchstart(e){
+    draggedElement = e.target;
+
+    e.target.dataset.cartaId = e.target.id;
+    
+    const touch = e.touches[0];
+    const rect = draggedElement.getBoundingClientRect();
+    
+    // Ajusta o offset para o centro da carta
+    offsetX = rect.width / 2;
+    offsetY = rect.height / 2;
+    
+    draggedElement.style.position = 'fixed';
+    draggedElement.style.left = `${touch.clientX - offsetX}px`;
+    draggedElement.style.top = `${touch.clientY - offsetY}px`;
+    draggedElement.style.width = `${rect.width}px`;
+    draggedElement.style.height = `${rect.height}px`;
+    draggedElement.style.zIndex = '1000';
+}
+
+function touchmove(e){
+    if (!draggedElement) return;
+    
+    const touch = e.touches[0];
+    // Centraliza a carta no dedo
+    draggedElement.style.left = `${touch.clientX - offsetX}px`;
+    draggedElement.style.top = `${touch.clientY - offsetY}px`;
+}
+
+function touchend(e){
+    if (!draggedElement) return;
+    
+    draggedElement.style.position = '';
+    draggedElement.style.left = '';
+    draggedElement.style.top = '';
+    draggedElement.style.width = '';
+    draggedElement.style.height = '';
+    draggedElement.style.zIndex = '';
+
+    const touch = e.changedTouches[0];
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    if (target) {
+        const dropTarget = target.closest('.pilha, .pilha_fundacao, .carta-virada');
+
+        if(dropTarget){
+            const origem = parseInt(e.target.dataset.cartaId);
+
+            validarMovimento(dropTarget, origem);
+        }
+    }
+    draggedElement = null;
 }
 
 //Evento chamado ao iniciar o movimento de uma carta
-function drag(ev) {
-    //Guarda o id do elemento que está sendo movido
-    ev.dataTransfer.setData("carta", ev.target.id);
+function drag(e) {
+    e.dataTransfer.setData("carta", e.target.id);
 }
 
 //Desabilita a funcao padrao ao movimentar uma carta
-function allowDrop(ev) {
-    ev.preventDefault();
+function allowDrop(e) {
+    e.preventDefault();
 }
 
 //Evento chamado ao soltar uma carta sobre a outra
-function drop(ev) {
-    ev.preventDefault();
-
-    //Pega os ids de origem e destino para validação da jogada
-    var origem = parseInt( ev.dataTransfer.getData("carta") );
-    var destino = parseInt(ev.target.id);
-
-    //verifica se o pilha de destino está vazia
-    if( !jogo.baralho[destino] ){
-        //verifica se a carta é o Rei( K = 13 ) e se o pilha de destino não é o pilha de fundacao
-        //A carta inicial das pilhas de montagemte devem ser obrigatoriamente um Rei
-        if( jogo.baralho[origem].carta != 13 && ev.target.classList.contains("pilha") ){
-            return;
-        }
-
-        //verifica se a carta é o Ás( A = 1 ) e se o pilha de destino é o pilha de fundacao
-        //A carta inicial das pilhas de fundacao devem ser obrigatoriamente um Ás
-        if( jogo.baralho[origem].carta != 1 && ev.target.classList.contains("pilha_fundacao") ){
-            return;
-        }
-
-        //retira da pilha atual
-        if( jogo.baralho[origem].pai != -1 ){
-            jogo.baralho[jogo.baralho[origem].pai].filho = -1;
-
-            //adiciona o css da carta virada ao elemento pai
-            let elemento_pai = document.getElementById(jogo.baralho[origem].pai);
-            if( !elemento_pai.classList.contains("carta-virada") )
-                jogo.virar_carta(jogo.baralho[origem].pai);
-        }
-
-        //verifica se a carta de origem está no pilha de estoque
-        if( document.querySelector(`.pilha_descarte [data-carta="${jogo.baralho[origem].nome}"][data-naipe="${jogo.baralho[origem].naipe.emoji}"]`) ){
-            //remove do pilha de estoques
-            jogo.descarte.splice(-1, 1);    
-        }
-
-        //move o elemento para o destino
-        ev.target.appendChild( document.getElementById(origem) );
-
-    //verifica se é o final da pilha
-    }else if( jogo.baralho[destino].filho == -1 ){
-        //verifica se a carta de destino está no pilha de descarte
-        //Cartas nao podem ser adicionas à pilha de descarte
-        if( document.querySelector(`.pilha_descarte [data-carta="${jogo.baralho[destino].nome}"][data-naipe="${jogo.baralho[destino].naipe.emoji}"]`) ){
-            return;
-        }
-
-        //verifica se a carta de destino está fora do pilha de fundacao
-        //Cartas da pilha de montagem devem ser de naipes de cor diferentes e seguindo uma ordem decrescente
-        if( document.querySelector(`.pilha [data-carta="${jogo.baralho[destino].nome}"][data-naipe="${jogo.baralho[destino].naipe.emoji}"]`) ){
-            //verifica se a carta destino é maior que a carta de origem
-            if( jogo.baralho[destino].carta != jogo.baralho[origem].carta + 1 ){
-                return;
-            }
+function drop(e) {
+    const origem = parseInt(e.dataTransfer.getData("carta"));
     
-            //verifica a cor das cartas
-            if( jogo.baralho[destino].naipe.cor == jogo.baralho[origem].naipe.cor ){
-                return;
-            }
-        //verifica se a carta de destino está na pilha de fundacao
-        //Cartas da pilha de fundacao devem ser do mesmo naipe em seguindo uma ordem crescente
-        }else if( document.querySelector(`.pilha_fundacao [data-carta="${jogo.baralho[destino].nome}"][data-naipe="${jogo.baralho[destino].naipe.emoji}"]`) ){
-            //verifica se a carta destino é menor que a carta de origem
-            if( jogo.baralho[destino].carta != jogo.baralho[origem].carta - 1 ){
-                return;
-            }
+    const targetElement = e.target.closest('.pilha, .pilha_fundacao, .carta-virada');
     
-            //verifica o naipe das cartas
-            if( jogo.baralho[destino].naipe.nome != jogo.baralho[origem].naipe.nome ){
-                return;
+    if (!targetElement) return;
+    
+    validarMovimento(targetElement, origem);
+    
+}
+
+function validarMovimento(targetElement, origem){
+    const destino = targetElement.classList.contains('carta-virada') ? 
+                   parseInt(targetElement.id) : 
+                   -1;
+
+    // Resto da lógica de validação e movimento das cartas
+    if (isNaN(destino) || destino === -1) {
+        // Lógica para pilhas vazias
+        if (targetElement.classList.contains("pilha") && jogo.baralho[origem].carta === 13) {
+            moverCarta(origem, targetElement);
+        } else if (targetElement.classList.contains("pilha_fundacao") && jogo.baralho[origem].carta === 1) {
+            moverCarta(origem, targetElement);
+        }
+    } else {
+        // Lógica para cartas existentes
+        const cartaDestino = jogo.baralho[destino];
+        const cartaOrigem = jogo.baralho[origem];
+
+        if (targetElement.closest('.pilha')) {
+            if (cartaDestino.carta === cartaOrigem.carta + 1 && 
+                cartaDestino.naipe.cor !== cartaOrigem.naipe.cor) {
+                moverCarta(origem, targetElement);
+            }
+        } else if (targetElement.closest('.pilha_fundacao')) {
+            if (cartaDestino.carta === cartaOrigem.carta - 1 && 
+                cartaDestino.naipe.nome === cartaOrigem.naipe.nome) {
+                moverCarta(origem, targetElement);
             }
         }
-
-        //Caso esteja tudo ok com a jogada, realiza o movimento
-
-        //Remove o encadeamento com a carta pai (caso haja)
-        if( jogo.baralho[origem].pai != -1 ){
-            jogo.baralho[jogo.baralho[origem].pai].filho = -1;
-
-            //Caso a carta pai esteja oculta, adiciona o css da carta virada ao elemento pai
-            let elemento_pai = document.getElementById(jogo.baralho[origem].pai);
-            if( !elemento_pai.classList.contains("carta-virada") )
-                jogo.virar_carta(jogo.baralho[origem].pai);
-        }
-        //coloca na pilha destino
-        jogo.baralho[origem].pai = destino;
-        jogo.baralho[destino].filho = origem;
-
-        //verifica se a carta de origem está no pilha de descarte
-        if( document.querySelector(`.pilha_descarte [data-carta="${jogo.baralho[origem].nome}"][data-naipe="${jogo.baralho[origem].naipe.emoji}"]`) ){
-            //remove do pilha de descarte
-            jogo.descarte.splice(-1, 1);    
-        }
-            
-        //move o elemento para o destino
-        ev.target.appendChild( document.getElementById(origem) );
-
-        //verifica se é o fim do jogo
-        let qtd_cartas_fundacao = document.querySelectorAll(".fundacoes .carta");
-        if(qtd_cartas_fundacao.length == jogo.baralho.length ){
-            //Exibe mensagem de parabéns e inicia um novo jogo(atualiza a tela)
-            if( confirm("Parabens, você ganhou o jogo!") ){
-                window.location.reload();
-            }
-        }
-
     }
 }
 
+function moverCarta(origem, targetElement) {
+    const carta = document.getElementById(origem);
+    
+    // Atualiza as relações pai/filho
+    if (jogo.baralho[origem].pai !== -1) {
+        jogo.baralho[jogo.baralho[origem].pai].filho = -1;
+        const elementoPai = document.getElementById(jogo.baralho[origem].pai);
+        if (!elementoPai.classList.contains("carta-virada")) {
+            jogo.virar_carta(jogo.baralho[origem].pai);
+        }
+    }
+
+    // Remove do descarte se necessário
+    if (carta.closest('.pilha_descarte')) {
+        jogo.descarte.splice(-1, 1);
+    }
+
+    // Move a carta
+    targetElement.appendChild(carta);
+
+    jogo.verificarFimDeJogo();
+}
+
 function main(){
+    // Adiciona eventos de drag and drop às pilhas de fundação
+    for (let i = 1; i <= 4; i++) {
+        const fundacao = document.getElementById(`fundacao${i}`);
+        fundacao.draggable = false;
+        fundacao.addEventListener('dragstart', drag, { passive: true });
+        fundacao.addEventListener('dragover', allowDrop); 
+        fundacao.addEventListener('drop', drop, { passive: true });
+        fundacao.addEventListener('touchstart', touchstart, { passive: true });
+        fundacao.addEventListener('touchmove', touchmove, { passive: true });
+        fundacao.addEventListener('touchend', touchend, { passive: true });
+    }
+
+    document.querySelectorAll('.pilha').forEach(pilha => {
+        pilha.draggable = false;
+        pilha.addEventListener('dragstart', drag, { passive: true });
+        pilha.addEventListener('dragover', allowDrop); 
+        pilha.addEventListener('drop', drop, { passive: true });
+        pilha.addEventListener('touchstart', touchstart, { passive: true });
+        pilha.addEventListener('touchmove', touchmove, { passive: true });
+        pilha.addEventListener('touchend', touchend, { passive: true });
+    });
+
     //Cria e embaralha as cartas
     jogo.baralho = embaralhar( criar_baralho() );
 
